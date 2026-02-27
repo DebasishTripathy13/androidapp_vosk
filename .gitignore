@@ -1,0 +1,31 @@
+# Gradle
+.gradle/
+build/
+app/build/
+**/build/
+
+# Local config
+local.properties
+*.local.properties
+
+# Android Studio
+.idea/
+*.iml
+*.ipr
+*.iws
+.DS_Store
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Keystore
+*.jks
+*.keystore
+
+# Model files (large binaries — user imports these themselves)
+**/*.task
+**/*.litertlm
+app/src/main/assets/model-hi/
+
+# Logs
+*.log

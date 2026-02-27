@@ -1,0 +1,78 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.example.docscriptai'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.example.docscriptai"
+        minSdk 24
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        // All ABIs for release; debug builds only arm64-v8a (fastest, covers all modern phones)
+        ndk {
+            abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+        }
+    }
+
+    buildTypes {
+        debug {
+            // Debug: arm64-v8a only — skips x86/x86_64 native lib packaging = much faster build
+            ndk {
+                abiFilters 'arm64-v8a'
+            }
+        }
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+
+    buildFeatures {
+        viewBinding true
+    }
+
+    packagingOptions {
+        pickFirst 'lib/x86/libc++_shared.so'
+        pickFirst 'lib/x86_64/libc++_shared.so'
+        pickFirst 'lib/armeabi-v7a/libc++_shared.so'
+        pickFirst 'lib/arm64-v8a/libc++_shared.so'
+    }
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.10.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.coordinatorlayout:coordinatorlayout:1.2.0'
+
+    // Vosk – offline speech recognition (same as test2application)
+    implementation 'com.alphacephei:vosk-android:0.3.32'
+    implementation('net.java.dev.jna:jna:5.12.1@aar') { transitive = true }
+
+    // MediaPipe GenAI – on-device LLM for .task files
+    implementation 'com.google.mediapipe:tasks-genai:0.10.27'
+
+    // LiteRT-LM – on-device LLM for .litertlm files (Gemma 3n, etc.)
+    implementation 'com.google.ai.edge.litertlm:litertlm-android:0.9.0-alpha04'
+
+    // TFLite via Google Play Services
+    implementation 'com.google.android.gms:play-services-tflite-java:16.4.0'
+    implementation 'com.google.android.gms:play-services-tflite-gpu:16.4.0'
+    implementation 'com.google.android.gms:play-services-tflite-support:16.4.0'
+
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+}

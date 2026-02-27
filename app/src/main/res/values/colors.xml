@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary blues (matches Gallery's blue-tinted medical palette) -->
+    <color name="primary_blue">#1976D2</color>
+    <color name="primary_blue_dark">#0D47A1</color>
+    <color name="recording_red">#D32F2F</color>
+    <color name="accent_teal">#00897B</color>
+
+    <!-- Backgrounds -->
+    <color name="background">#F0F4F8</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="card_header">#E3F2FD</color>
+
+    <!-- Text -->
+    <color name="primary_text">#102027</color>
+    <color name="secondary_text">#546E7A</color>
+    <color name="hint_text">#90A4AE</color>
+
+    <!-- Status -->
+    <color name="success_green">#388E3C</color>
+    <color name="error_red">#C62828</color>
+</resources>
