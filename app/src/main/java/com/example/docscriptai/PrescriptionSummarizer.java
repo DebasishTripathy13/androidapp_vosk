@@ -3,76 +3,108 @@ package com.example.docscriptai;
 import android.util.Log;
 
 /**
- * Makes 4 separate LLM calls — one per section — so each prompt is tiny,
- * focused, and far less likely to enter a repetition loop.
+ * Makes 5 sequential LLM calls — one per section — to produce a structured
+ * Hindi prescription in the standard format:
+ *   शिकायतें / Rx / सलाह / जांच / फॉलो-अप
  */
 public class PrescriptionSummarizer {
 
     private static final String TAG = "PrescriptionSummarizer";
 
-    // Base: one-shot example + rules, prepended to every section question.
-    // English instructions give small on-device models the clearest signal.
+    // One-shot example that matches the exact desired output format.
     private static final String BASE =
-        // ---- One-shot example so the model learns the expected format ----
         "EXAMPLE\n" +
-        "Transcription: \"patient hai viral fever hai paracetamol 500mg din mein teen baar do " +
-        "aur ek hafte baad dobara aao blood test nahi chahiye\"\n" +
-        "Diagnosis answer (Hindi): वायरल बुखार\n" +
-        "Medications answer (English):\n- Paracetamol 500mg three times a day\n" +
-        "Follow-up answer (Hindi): एक हफ्ते बाद दोबारा आएं\n" +
-        "Tests answer (Hindi): उल्लेख नहीं किया गया\n" +
+        "Transcription: \"patient ko teen din se paseliyan chal rahi hain, sans lene mein takleef hai, " +
+        "bukhaar hai, kamzori hai, khansi hai, thand lag rahi hai. " +
+        "Amoxicillin 500mg subah 1 raat 1 saat din tak. " +
+        "Paracetamol 500mg subah 1 dopahar 1 raat 1 teen din tak. " +
+        "Vitamin C subah 1 pandrah din tak. " +
+        "Hafta bhar baad follow-up. X-ray aur blood test karana hoga. " +
+        "Halka khana khayein, pani piyen, dhoomrapan se bachen, do hafte aaraam karein.\"\n" +
+        "\n" +
+        "शिकायतें (c/o) answer:\n" +
+        "- पसली चलना × 3 दिन\n" +
+        "- सांस लेने में तकलीफ × 3 दिन\n" +
+        "- बुखार × 3 दिन\n" +
+        "- शरीर में कमज़ोरी × 3 दिन\n" +
+        "- खांसी × 3 दिन\n" +
+        "- शरीर में ठंड लगना × 3 दिन\n" +
+        "\n" +
+        "Rx / दवाइयाँ answer:\n" +
+        "- एमोक्सिसिलिन 500 mg  सुबह 1 – दोपहर 0 – रात 1 × 7 दिन\n" +
+        "- पैरासिटामोल 500 mg  सुबह 1 – दोपहर 1 – रात 1 × 3 दिन\n" +
+        "- विटामिन सी  सुबह 1 – दोपहर 0 – रात 0 × 15 दिन\n" +
+        "\n" +
+        "सलाह answer:\n" +
+        "- हल्का, पौष्टिक आहार (सूप, दलिया, स्टीम्ड सब्ज़ियाँ) लें।\n" +
+        "- भरपूर पानी पिएँ और धूम्रपान/शराब से परहेज़ करें।\n" +
+        "- कम से कम 2 हफ़्ते तक आराम करें।\n" +
+        "\n" +
+        "जांच answer:\n" +
+        "- एक्स-रे (छाती)\n" +
+        "- ब्लड टेस्ट\n" +
+        "\n" +
+        "फॉलो-अप answer:\n" +
+        "- अगले हफ़्ते\n" +
         "END EXAMPLE\n\n" +
-        // ---- Hard rules ----
         "Rules:\n" +
-        "1. Extract ONLY what is explicitly spoken in the transcription. Do NOT add anything extra.\n" +
-        "2. No markdown (no **, *, #). Plain text only.\n" +
-        "3. Diagnosis / Follow-up / Tests: answer in Hindi.\n" +
-        "4. Medications: English only (drug name, dose, frequency). One item per line starting with -.\n" +
-        "5. If a section's information is absent, write exactly: उल्लेख नहीं किया गया\n\n" +
-        // ---- Real transcription ----
+        "1. Extract ONLY what was explicitly said. Do NOT invent or guess.\n" +
+        "2. Answer in Hindi (Devanagari script) only. No English except medicine names.\n" +
+        "3. Each item on its own line starting with -.\n" +
+        "4. Medicines format: - नाम dose  सुबह X – दोपहर X – रात X × N दिन\n" +
+        "5. If a section has no information write exactly: उल्लेख नहीं किया गया\n" +
+        "6. No asterisks, no markdown, no extra commentary.\n\n" +
+        "Now extract from this transcription:\n" +
         "Transcription: \"%s\"\n\n";
 
     private static final String[] SECTION_LABELS = {
-        "1. निदान (Diagnosis)",
-        "2. दवाइयाँ (Medications)",
-        "3. फॉलो-अप (Follow-up)",
-        "4. जाँच / टेस्ट (Tests)"
+        "शिकायतें (c/o)",
+        "Rx / दवाइयाँ",
+        "सलाह",
+        "जांच",
+        "फॉलो-अप"
     };
 
     private static final String[] SECTION_QUESTIONS = {
-        // Diagnosis — Hindi output
-        "From the transcription above, what disease or condition did the doctor mention?\n" +
-        "Answer in Hindi, 1 sentence only. No extra text.\n" +
-        "Diagnosis answer (Hindi):",
+        // 1. Complaints
+        "Question: List all the patient's symptoms and complaints mentioned.\n" +
+        "Format each as: - लक्षण × N दिन  (include duration if mentioned)\n" +
+        "Hindi only, one item per line starting with -.\n" +
+        "शिकायतें (c/o) answer:",
 
-        // Medications — English list
-        "From the transcription above, list ONLY the medicines the doctor mentioned.\n" +
-        "Format: - MedicineName Dose Frequency  (e.g. - Paracetamol 500mg twice daily)\n" +
-        "English only. One item per line starting with -. If none mentioned write: उल्लेख नहीं किया गया\n" +
-        "Medications answer (English):",
+        // 2. Medicines
+        "Question: List every medicine the doctor prescribed.\n" +
+        "Format each as: - दवा का नाम dose  सुबह X – दोपहर X – रात X × N दिन\n" +
+        "Hindi/mixed medicine names are fine, one medicine per line starting with -.\n" +
+        "Rx / दवाइयाँ answer:",
 
-        // Follow-up — Hindi output
-        "From the transcription above, what follow-up or return visit did the doctor mention?\n" +
-        "Answer in Hindi, 1 sentence only. If not mentioned write: उल्लेख नहीं किया गया\n" +
-        "Follow-up answer (Hindi):",
+        // 3. Advice
+        "Question: List all lifestyle advice, diet instructions, or precautions the doctor gave.\n" +
+        "Hindi only, one instruction per line starting with -.\n" +
+        "सलाह answer:",
 
-        // Tests — Hindi output
-        "From the transcription above, what tests or investigations did the doctor mention?\n" +
-        "Answer in Hindi, 1 sentence only. If not mentioned write: उल्लेख नहीं किया गया\n" +
-        "Tests answer (Hindi):"
+        // 4. Tests
+        "Question: List all medical tests, investigations, or lab work the doctor ordered.\n" +
+        "Hindi only, one test per line starting with -.\n" +
+        "जांच answer:",
+
+        // 5. Follow-up
+        "Question: When did the doctor ask the patient to return for follow-up?\n" +
+        "Hindi only, one short line starting with -.\n" +
+        "फॉलो-अप answer:"
     };
 
-    // The suffix of each SECTION_QUESTIONS entry — used to strip echoed prompts.
     private static final String[] ANSWER_MARKERS = {
-        "Diagnosis answer (Hindi):",
-        "Medications answer (English):",
-        "Follow-up answer (Hindi):",
-        "Tests answer (Hindi):"
+        "शिकायतें (c/o) answer:",
+        "Rx / दवाइयाँ answer:",
+        "सलाह answer:",
+        "जांच answer:",
+        "फॉलो-अप answer:"
     };
 
     public interface SummaryCallback {
         void onToken(String token);
-        void onSectionStart(int sectionIndex, String label);  // fires before each LLM call
+        void onSectionStart(int sectionIndex, String label);
         void onComplete(String fullSummary);
         void onError(String error);
     }
@@ -83,10 +115,6 @@ public class PrescriptionSummarizer {
         this.llm = llm;
     }
 
-    /**
-     * Runs 4 sequential sync LLM calls on a background thread.
-     * Appends each section to summaryText as it completes.
-     */
     public void summarize(String transcription, android.app.Activity activity, SummaryCallback callback) {
         if (!llm.isInitialized()) {
             activity.runOnUiThread(() -> callback.onError("AI model not loaded. Please select a model first."));
@@ -102,10 +130,8 @@ public class PrescriptionSummarizer {
                 final String prompt = base + SECTION_QUESTIONS[i];
                 final int idx = i;
 
-                // Notify UI which section is starting
                 activity.runOnUiThread(() -> callback.onSectionStart(idx, label));
 
-                // Show section header immediately
                 final String header = (i == 0 ? "" : "\n\n") + label + ":\n";
                 activity.runOnUiThread(() -> callback.onToken(header));
                 fullOutput.append(header);
@@ -115,7 +141,7 @@ public class PrescriptionSummarizer {
                     String answer = clean(raw, ANSWER_MARKERS[i]);
                     fullOutput.append(answer);
                     activity.runOnUiThread(() -> callback.onToken(answer));
-                    Log.d(TAG, "Section " + (i + 1) + " done: " + answer.length() + " chars | raw=" + raw.length() + " chars");
+                    Log.d(TAG, "Section " + (i + 1) + " done: " + answer.length() + " chars");
                 } catch (Throwable t) {
                     Log.e(TAG, "Section " + (i + 1) + " failed", t);
                     String err = "उल्लेख नहीं किया गया";
@@ -129,30 +155,19 @@ public class PrescriptionSummarizer {
         }).start();
     }
 
-    /**
-     * Strip echoed prompt prefix (takes text after the last occurrence of answerMarker),
-     * remove markdown artifacts, and trim. Falls back to the sentinel if result is empty.
-     */
     private static String clean(String s, String answerMarker) {
         if (s == null || s.trim().isEmpty()) return "उल्लेख नहीं किया गया";
-        // If the model echoed the prompt, grab only what follows the answer marker.
         String lower = s.toLowerCase();
         String markerLower = answerMarker.toLowerCase();
         int idx = lower.lastIndexOf(markerLower);
         if (idx >= 0) {
             s = s.substring(idx + answerMarker.length());
         }
-        // Strip markdown artifacts.
         s = s.replaceAll("\\*{1,3}", "")
              .replaceAll("#{1,6}\\s?", "")
              .replaceAll("_{1,2}", "")
              .trim();
-        // First line only if there are multiple lines that look like echoed instructions.
-        // (Guard: keep multi-line for medications which intentionally has bullet lines.)
-        if (!answerMarker.contains("Medications") && s.contains("\n")) {
-            String firstLine = s.split("\n")[0].trim();
-            if (!firstLine.isEmpty()) s = firstLine;
-        }
         return s.isEmpty() ? "उल्लेख नहीं किया गया" : s;
     }
 }
+
