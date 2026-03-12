@@ -81,7 +81,7 @@ public class LlmInferenceHelper {
                     LlmInferenceOptions opts = LlmInferenceOptions.builder()
                             .setModelPath(f.getAbsolutePath())
                             .setMaxTopK(40)
-                            .setMaxTokens(512)
+                            .setMaxTokens(2048)
                             .build();
                     llmInference = LlmInference.createFromOptions(context, opts);
                     useLiteRtLm = false;
