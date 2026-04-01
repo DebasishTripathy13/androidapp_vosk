@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">DocScriptAI</string>
+    <string name="app_subtitle">AI Medical Scribe</string>
+    <string name="preparing">मॉडल लोड हो रहा है…\nPreparing model…</string>
+    <string name="ready">रिकॉर्ड बटन दबाएं और बोलना शुरू करें\nTap the record button and start speaking</string>
+    <string name="recording">रिकॉर्डिंग जारी है… बोलते रहें\nRecording… keep speaking</string>
+    <string name="transcribing">ट्रांसक्रिप्शन हो रहा है…\nTranscribing…</string>
+    <string name="processing">AI प्रोसेसिंग हो रही है…\nAI Processing…</string>
+    <string name="error_mic_permission">माइक्रोफ़ोन की अनुमति ज़रूरी है\nMicrophone permission required</string>
+    <string name="error_model_load">मॉडल लोड करने में विफल\nFailed to load model</string>
+    <string name="record">रिकॉर्ड करें</string>
+    <string name="stop">रुकें</string>
+    <string name="process_with_ai">AI से प्रोसेस करें</string>
+    <string name="load_llm_model">LLM मॉडल लोड करें</string>
+    <string name="select_model_file">.litertlm मॉडल फ़ाइल चुनें</string>
+    <string name="diagnosis_title">🩺 डॉक्टर (Diagnosis)</string>
+    <string name="medication_title">💊 दवाई (Medication)</string>
+    <string name="dosage_title">⏱ खुराक (Dosage)</string>
+    <string name="followup_title">📅 फॉलोअप (Follow-up)</string>
+    <string name="other_tests_title">🔬 जांच (Tests)</string>
+    <string name="no_data">कोई डेटा नहीं</string>
+    <string name="transcription_label">ट्रांसक्रिप्शन (Transcription)</string>
+    <string name="results_label">रिपोर्ट (Report)</string>
+    <string name="model_loaded">मॉडल लोड हो गया ✓</string>
+    <string name="download_model">Google Drive से डाउनलोड करें</string>
+    <string name="gdrive_model_file_id">1U37HIU2Csu-9aADLH0oevnL6qGmsjmTV</string>
+    <string name="gdrive_not_configured">Google Drive file ID कॉन्फ़िगर नहीं है\nSet gdrive_model_file_id in strings.xml</string>
+    <string name="downloading_model">Google Drive से मॉडल डाउनलोड हो रहा है…\nDownloading model from Google Drive…</string>
+    <string name="download_started">डाउनलोड शुरू हो गया (नोटिफ़िकेशन देखें)\nDownload started — check notifications</string>
+    <string name="download_complete">डाउनलोड पूरा हुआ, मॉडल लोड हो रहा है…\nDownload complete, loading model…</string>
+    <string name="download_failed">डाउनलोड विफल रहा\nDownload failed</string>
+    <string name="scan_found_model">.task मॉडल मिला, लोड हो रहा है…\nFound .task model, loading…</string>
+    <string name="model_not_loaded">LLM मॉडल लोड नहीं है</string>
+    <string name="clear">साफ़ करें</string>
+    <string name="llm_not_available">LLM मॉडल लोड नहीं है। कृपया पहले मॉडल लोड करें।\nLLM model not loaded. Please load a model first.</string>
+    <string name="badge_vosk_loading">🔄 Vosk लोड हो रहा है</string>
+    <string name="badge_vosk_ready">✓ Vosk तैयार</string>
+    <string name="badge_vosk_error">✗ Vosk विफल</string>
+    <string name="badge_llm_none">⬇ AI मॉडल नहीं</string>
+    <string name="badge_llm_loading">🔄 AI लोड हो रहा है</string>
+    <string name="badge_llm_ready">✓ AI तैयार</string>
+    <string name="record_hint">बोलने के लिए दबाएं</string>
+    <string name="upload_audio">ऑडियो अपलोड करें</string>
+    <string name="converting">कन्वर्ट हो रहा है…\nConverting...</string>
+    <string name="conversion_failed">रूपांतरण विफल रहा\nConversion failed</string>
+</resources>

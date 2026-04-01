@@ -1,0 +1,34 @@
+# Android build outputs
+*.iml
+.gradle/
+local.properties
+.idea/
+.DS_Store
+build/
+captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+*.ap_
+
+# LLM model files — too large for git
+*.litertlm
+*.task
+*.bin
+*.gguf
+
+# Vosk model assets (unpacked at runtime)
+app/src/main/assets/model*/
+app/src/main/assets/model-hi/
+
+# Kotlin incremental build
+kotlin/
+
+# Gradle cache
+**/.gradle/
+
+# Local signing configs
+keystore.properties
+*.jks
+*.keystore

@@ -1,0 +1,571 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/surface">
+
+    <!-- ── App Bar ── -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="0dp">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/primary"
+            app:title="@string/app_name"
+            app:subtitle="@string/app_subtitle"
+            app:titleTextColor="@color/on_primary"
+            app:titleTextAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+            app:subtitleTextColor="#B3FFFFFF" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:overScrollMode="never"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- ── Status Card ── -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/statusCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="14dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="@color/surface_card"
+                app:strokeColor="@color/divider"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="14dp">
+
+                    <!-- Model status badges row -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="10dp"
+                        android:gravity="start">
+
+                        <TextView
+                            android:id="@+id/voskStatusBadge"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="8dp"
+                            android:text="@string/badge_vosk_loading"
+                            android:textSize="12sp"
+                            android:textColor="@color/badge_pending_text"
+                            android:background="@drawable/badge_bg_pending"
+                            android:paddingStart="10dp"
+                            android:paddingEnd="10dp"
+                            android:paddingTop="4dp"
+                            android:paddingBottom="4dp" />
+
+                        <TextView
+                            android:id="@+id/llmStatusBadge"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/badge_llm_none"
+                            android:textSize="12sp"
+                            android:textColor="@color/badge_pending_text"
+                            android:background="@drawable/badge_bg_pending"
+                            android:paddingStart="10dp"
+                            android:paddingEnd="10dp"
+                            android:paddingTop="4dp"
+                            android:paddingBottom="4dp" />
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/statusText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/preparing"
+                        android:textSize="13sp"
+                        android:textColor="@color/on_surface_secondary"
+                        android:lineSpacingExtra="2dp" />
+
+                    <ProgressBar
+                        android:id="@+id/progressBar"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="4dp"
+                        android:layout_marginTop="10dp"
+                        android:indeterminate="true"
+                        android:progressTint="@color/primary"
+                        android:indeterminateTint="@color/primary"
+                        android:visibility="visible" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- ── Record Hero ── -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="14dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="3dp"
+                app:cardBackgroundColor="@color/surface_card">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:paddingTop="24dp"
+                    android:paddingBottom="20dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnRecord"
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:enabled="false"
+                        app:icon="@android:drawable/ic_btn_speak_now"
+                        app:iconSize="32dp"
+                        app:iconGravity="textStart"
+                        app:iconPadding="0dp"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        app:cornerRadius="40dp"
+                        app:backgroundTint="@color/primary" />
+
+                    <TextView
+                        android:id="@+id/recordHintText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:text="@string/record_hint"
+                        android:textSize="13sp"
+                        android:textColor="@color/on_surface_secondary" />
+
+                    <!-- Process button below record -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnProcess"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginTop="16dp"
+                        android:text="@string/process_with_ai"
+                        android:textSize="14sp"
+                        android:enabled="false"
+                        app:cornerRadius="12dp"
+                        app:backgroundTint="@color/primary" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- ── Secondary Actions Row ── -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="14dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnUploadAudio"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="6dp"
+                    android:text="@string/upload_audio"
+                    android:textSize="13sp"
+                    app:icon="@android:drawable/ic_menu_upload"
+                    app:iconGravity="textStart"
+                    app:iconSize="18dp"
+                    app:cornerRadius="12dp"
+                    app:strokeColor="@color/primary" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnLoadModel"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="6dp"
+                    android:text="@string/load_llm_model"
+                    android:textSize="13sp"
+                    app:icon="@android:drawable/ic_menu_upload"
+                    app:iconGravity="textStart"
+                    app:iconSize="18dp"
+                    app:cornerRadius="12dp"
+                    app:strokeColor="@color/primary" />
+
+            </LinearLayout>
+
+            <!-- ── Download Row ── -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnDownloadModel"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginBottom="16dp"
+                android:text="@string/download_model"
+                android:textSize="13sp"
+                app:icon="@android:drawable/stat_sys_download"
+                app:iconGravity="textStart"
+                app:iconSize="18dp"
+                app:cornerRadius="12dp"
+                app:backgroundTint="@color/primary_dark" />
+
+            <!-- ── Transcription Card ── -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/transcriptionCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="@color/surface_card">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="10dp"
+                        android:gravity="center_vertical">
+
+                        <View
+                            android:layout_width="4dp"
+                            android:layout_height="18dp"
+                            android:background="@color/primary"
+                            android:layout_marginEnd="8dp" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/transcription_label"
+                            android:textSize="14sp"
+                            android:textColor="@color/primary"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/transcriptionText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:minHeight="90dp"
+                        android:textSize="15sp"
+                        android:textColor="@color/on_surface"
+                        android:lineSpacingExtra="5dp"
+                        android:hint="यहाँ ट्रांसक्रिप्शन दिखेगा…"
+                        android:textColorHint="@color/on_surface_secondary"
+                        android:scrollbars="vertical" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- ── Results Header ── -->
+            <LinearLayout
+                android:id="@+id/resultsHeader"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="10dp"
+                android:visibility="gone">
+
+                <View
+                    android:layout_width="4dp"
+                    android:layout_height="22dp"
+                    android:background="@color/primary"
+                    android:layout_marginEnd="8dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/results_label"
+                    android:textSize="17sp"
+                    android:textColor="@color/on_surface"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <!-- ── Diagnosis Card ── -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/diagnosisCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:visibility="gone"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="@color/card_diagnosis">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <View
+                        android:layout_width="5dp"
+                        android:layout_height="match_parent"
+                        android:background="@color/accent_diagnosis" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="14dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/diagnosis_title"
+                            android:textSize="13sp"
+                            android:textColor="@color/accent_diagnosis"
+                            android:textStyle="bold"
+                            android:layout_marginBottom="6dp" />
+
+                        <TextView
+                            android:id="@+id/diagnosisText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textSize="15sp"
+                            android:textColor="@color/on_surface"
+                            android:lineSpacingExtra="4dp" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- ── Medication Card ── -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/medicationCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:visibility="gone"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="@color/card_medication">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <View
+                        android:layout_width="5dp"
+                        android:layout_height="match_parent"
+                        android:background="@color/accent_medication" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="14dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/medication_title"
+                            android:textSize="13sp"
+                            android:textColor="@color/accent_medication"
+                            android:textStyle="bold"
+                            android:layout_marginBottom="6dp" />
+
+                        <TextView
+                            android:id="@+id/medicationText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textSize="15sp"
+                            android:textColor="@color/on_surface"
+                            android:lineSpacingExtra="4dp" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- ── Dosage Card ── -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/dosageCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:visibility="gone"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="@color/card_dosage">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <View
+                        android:layout_width="5dp"
+                        android:layout_height="match_parent"
+                        android:background="@color/accent_dosage" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="14dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/dosage_title"
+                            android:textSize="13sp"
+                            android:textColor="@color/accent_dosage"
+                            android:textStyle="bold"
+                            android:layout_marginBottom="6dp" />
+
+                        <TextView
+                            android:id="@+id/dosageText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textSize="15sp"
+                            android:textColor="@color/on_surface"
+                            android:lineSpacingExtra="4dp" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- ── Follow-up Card ── -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/followupCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:visibility="gone"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="@color/card_followup">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <View
+                        android:layout_width="5dp"
+                        android:layout_height="match_parent"
+                        android:background="@color/accent_followup" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="14dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/followup_title"
+                            android:textSize="13sp"
+                            android:textColor="@color/accent_followup"
+                            android:textStyle="bold"
+                            android:layout_marginBottom="6dp" />
+
+                        <TextView
+                            android:id="@+id/followupText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textSize="15sp"
+                            android:textColor="@color/on_surface"
+                            android:lineSpacingExtra="4dp" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- ── Tests Card ── -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/testsCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:visibility="gone"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="@color/card_tests">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <View
+                        android:layout_width="5dp"
+                        android:layout_height="match_parent"
+                        android:background="@color/accent_tests" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="14dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/other_tests_title"
+                            android:textSize="13sp"
+                            android:textColor="@color/accent_tests"
+                            android:textStyle="bold"
+                            android:layout_marginBottom="6dp" />
+
+                        <TextView
+                            android:id="@+id/testsText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textSize="15sp"
+                            android:textColor="@color/on_surface"
+                            android:lineSpacingExtra="4dp" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- ── Clear Button ── -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnClear"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginBottom="8dp"
+                android:text="@string/clear"
+                android:textColor="@color/error"
+                android:visibility="gone"
+                app:cornerRadius="12dp"
+                app:strokeColor="@color/error" />
+
+        </LinearLayout>
+    </ScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
