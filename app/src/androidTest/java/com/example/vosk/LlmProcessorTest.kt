@@ -138,8 +138,11 @@ class LlmProcessorTest {
             "नहीं", "कुछ नहीं", "न/a", "n/a", "none"
         )
 
-        private fun looksLikeNone(value: String) =
-            NONE_PHRASES.any { value.trim().lowercase().contains(it.lowercase()) }
+        private fun looksLikeNone(value: String): Boolean {
+            val v = value.trim().lowercase()
+            // "सामान्य स्वास्थ्य" etc. is valid diagnosis content — not "none"
+            return NONE_PHRASES.any { v == it.lowercase() }
+        }
 
         private fun evaluate(tc: TestCase, report: MedicalReport): List<String> {
             val failures = mutableListOf<String>()
