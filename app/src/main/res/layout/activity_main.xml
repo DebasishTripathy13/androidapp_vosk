@@ -405,55 +405,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- ── Dosage Card ── -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/dosageCard"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                android:visibility="gone"
-                app:cardCornerRadius="14dp"
-                app:cardElevation="2dp"
-                app:cardBackgroundColor="@color/card_dosage">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <View
-                        android:layout_width="5dp"
-                        android:layout_height="match_parent"
-                        android:background="@color/accent_dosage" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="14dp">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/dosage_title"
-                            android:textSize="13sp"
-                            android:textColor="@color/accent_dosage"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="6dp" />
-
-                        <TextView
-                            android:id="@+id/dosageText"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:textSize="15sp"
-                            android:textColor="@color/on_surface"
-                            android:lineSpacingExtra="4dp" />
-
-                    </LinearLayout>
-
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
             <!-- ── Follow-up Card ── -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/followupCard"

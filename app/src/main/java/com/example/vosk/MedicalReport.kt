@@ -5,8 +5,7 @@ package com.example.vosk
  */
 data class MedicalReport(
     val diagnosis: String,      // डॉक्टर
-    val medication: String,     // दवाई
-    val dosage: String,         // खुराक
+    val medication: String,     // दवाई (with dosage inline)
     val otherTests: String,     // जांच
     val followUp: String        // फॉलोअप
 )

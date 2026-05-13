@@ -559,11 +559,10 @@ class MainActivity : AppCompatActivity() {
             val result = llmProcessor.processTranscription(text) { field, value ->
                 withContext(Dispatchers.Main) {
                     when (field) {
-                        "diagnosis" -> { binding.diagnosisCard.visibility = View.VISIBLE;  binding.diagnosisText.text = value }
+                        "diagnosis"  -> { binding.diagnosisCard.visibility = View.VISIBLE;  binding.diagnosisText.text = value }
                         "medication" -> { binding.medicationCard.visibility = View.VISIBLE; binding.medicationText.text = value }
-                        "dosage"    -> { binding.dosageCard.visibility = View.VISIBLE;     binding.dosageText.text = value }
-                        "tests"     -> { binding.testsCard.visibility = View.VISIBLE;      binding.testsText.text = value }
-                        "followUp"  -> { binding.followupCard.visibility = View.VISIBLE;   binding.followupText.text = value }
+                        "tests"      -> { binding.testsCard.visibility = View.VISIBLE;      binding.testsText.text = value }
+                        "followUp"   -> { binding.followupCard.visibility = View.VISIBLE;   binding.followupText.text = value }
                     }
                 }
             }
@@ -592,14 +591,12 @@ class MainActivity : AppCompatActivity() {
         binding.resultsHeader.visibility = View.VISIBLE
         binding.diagnosisCard.visibility = View.VISIBLE
         binding.medicationCard.visibility = View.VISIBLE
-        binding.dosageCard.visibility = View.VISIBLE
         binding.followupCard.visibility = View.VISIBLE
         binding.testsCard.visibility = View.VISIBLE
         binding.btnClear.visibility = View.VISIBLE
 
         binding.diagnosisText.text = report.diagnosis
         binding.medicationText.text = report.medication
-        binding.dosageText.text = report.dosage
         binding.followupText.text = report.followUp
         binding.testsText.text = report.otherTests
     }
@@ -608,7 +605,6 @@ class MainActivity : AppCompatActivity() {
         binding.resultsHeader.visibility = View.GONE
         binding.diagnosisCard.visibility = View.GONE
         binding.medicationCard.visibility = View.GONE
-        binding.dosageCard.visibility = View.GONE
         binding.followupCard.visibility = View.GONE
         binding.testsCard.visibility = View.GONE
     }

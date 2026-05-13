@@ -23,75 +23,63 @@ class LlmProcessor {
         private const val TRUNCATION_HEAD = 2500
         private const val TRUNCATION_TAIL = 3200
 
-        private val LABELS = listOf("डॉक्टर", "दवाई", "खुराक", "जांच", "फॉलोअप")
+        // 4 fields — dosage is now inline with medicine
+        private val LABELS = listOf("डॉक्टर", "दवाई", "जांच", "फॉलोअप")
 
-        private const val SYSTEM_INSTRUCTION = """आप एक अनुभवी मेडिकल स्क्राइब हैं। डॉक्टर और मरीज़ की बातचीत पढ़कर हिंदी में नीचे दी गई ठीक 5 लाइनें इसी क्रम में लिखें:
+        private const val SYSTEM_INSTRUCTION = """आप एक अनुभवी मेडिकल स्क्राइब हैं। डॉक्टर और मरीज़ की बातचीत पढ़कर हिंदी में नीचे दी गई ठीक 4 लाइनें इसी क्रम में लिखें:
 डॉक्टर: [बीमारी और लक्षण — डॉक्टर की भाषा में]
-दवाई: [दवाओं के नाम हिंदी में]
-खुराक: [X-X-X (सुबह-दोपहर-रात) के रूप में]
+दवाई: [दवा का नाम (X-X-X सुबह-दोपहर-रात), दवा का नाम (X-X-X सुबह-दोपहर-रात)]
 जांच: [जांचों के नाम हिंदी में]
 फॉलोअप: [कब और किस स्थिति में वापस आना है]
 
 नियम:
-- हमेशा इसी क्रम में लिखें: डॉक्टर → दवाई → खुराक → जांच → फॉलोअप
-- दवाई और जांच के नाम हमेशा हिंदी (देवनागरी) में लिखें — जैसे Paracetamol → पैरासिटामोल, CBC → सीबीसी, ECG → ईसीजी, X-ray → एक्स-रे
-- खुराक हमेशा X-X-X रूप में लिखें (जैसे 1-0-1 या 1-1-1) और समय (सुबह-दोपहर-रात) ज़रूर लिखें
-- दवाई में सिर्फ़ नाम लिखें, खुराक अलग लाइन पर लिखें
+- हमेशा इसी क्रम में लिखें: डॉक्टर → दवाई → जांच → फॉलोअप
+- दवाई में हर दवा के साथ उसी की खुराक X-X-X रूप में लिखें — जैसे: पैरासिटामोल 500mg (1-1-1 सुबह-दोपहर-रात)
+- दवाई और जांच के नाम हमेशा हिंदी (देवनागरी) में लिखें — जैसे Paracetamol → पैरासिटामोल, CBC → सीबीसी, ECG → ईसीजी
 - जांच में सिर्फ़ जांचें लिखें, दवाएं नहीं
-- जो जानकारी न हो या कोई दवा / जांच न दी गई हो: सिर्फ़ "उल्लेख नहीं" लिखें — "कोई नहीं", "कोई दवा नहीं" आदि मत लिखें
+- जो जानकारी न हो: सिर्फ़ "उल्लेख नहीं" लिखें
 - कोई अतिरिक्त टेक्स्ट नहीं
 
 उदाहरण 1:
-Conversation: मरीज़ को 3 दिन से तेज़ बुखार, सिरदर्द और बदन दर्द है। डॉक्टर ने वायरल फ्लू बताया। Paracetamol 500mg दिन में 3 बार और Cetirizine 10mg रात को दी। 5 दिन बाद ठीक न हो तो आएं। CBC करवाएं।
+Conversation: मरीज़ को 3 दिन से तेज़ बुखार, सिरदर्द और बदन दर्द है। वायरल फ्लू बताया। Paracetamol 500mg दिन में 3 बार और Cetirizine 10mg रात को दी। 5 दिन बाद आएं। CBC करवाएं।
 डॉक्टर: वायरल फ्लू, तेज़ बुखार, सिरदर्द, बदन दर्द
-दवाई: पैरासिटामोल 500mg, सेटिरिज़िन 10mg
-खुराक: 1-1-1 (सुबह-दोपहर-रात), 0-0-1 (रात)
+दवाई: पैरासिटामोल 500mg (1-1-1 सुबह-दोपहर-रात), सेटिरिज़िन 10mg (0-0-1 रात)
 जांच: सीबीसी
 फॉलोअप: 5 दिन बाद यदि सुधार न हो
 
 उदाहरण 2:
-Conversation: खांसी है 5 दिन से। डॉक्टर ने खांसी की दवा और Vitamin C दिए। 7 दिन में ठीक न हो तो आएं। कोई जांच नहीं।
+Conversation: खांसी है 5 दिन से। खांसी की दवा और Vitamin C दिए। 7 दिन में ठीक न हो तो आएं। कोई जांच नहीं।
 डॉक्टर: खांसी, 5 दिन से
-दवाई: खांसी की दवा, विटामिन सी
-खुराक: 1-1-1 (सुबह-दोपहर-रात)
+दवाई: खांसी की दवा (1-1-1 सुबह-दोपहर-रात), विटामिन सी (1-0-0 सुबह)
 जांच: उल्लेख नहीं
 फॉलोअप: 7 दिन बाद यदि ठीक न हो
 
 उदाहरण 3:
-Conversation: BP 160/100 है, सीने में हल्का दर्द। Hypertension confirm। Amlodipine 5mg रोज़ सुबह लिखी। ECG और Kidney Function Test करवाएं। 2 हफ्ते बाद रिपोर्ट लेकर आएं।
+Conversation: BP 160/100 है, सीने में हल्का दर्द। Hypertension confirm। Amlodipine 5mg रोज़ सुबह। ECG और Kidney Function Test। 2 हफ्ते बाद रिपोर्ट के साथ।
 डॉक्टर: उच्च रक्तचाप, सीने में दर्द, बीपी 160/100
-दवाई: अम्लोडिपिन 5mg
-खुराक: 1-0-0 (सुबह)
+दवाई: अम्लोडिपिन 5mg (1-0-0 सुबह)
 जांच: ईसीजी, किडनी फंक्शन टेस्ट
 फॉलोअप: 2 हफ्ते बाद रिपोर्ट के साथ"""
 
-        // 0.4 — enough precision for structured output, enough freedom to capture all fields
         private val SAMPLER = SamplerConfig(topK = 40, topP = 0.95, temperature = 0.4)
 
-        // Prime with "डॉक्टर:" so the model starts filling the first field immediately.
         private fun extractionPrompt(text: String) = "$text\nडॉक्टर:"
 
-        // Regex: match each full-word label, capture value up to next label or end.
-        // ' *' (not '\s*') so we don't consume the newline separating fields.
         private val FIELD_PATTERN by lazy {
             val alt = LABELS.joinToString("|") { Regex.escape(it) }
             Regex("""(${alt}): *(.*?)(?=\n(?:${alt}):|$)""", setOf(RegexOption.DOT_MATCHES_ALL))
         }
 
         private fun parseResponse(raw: String): MedicalReport {
-            // Prepend "डॉक्टर:" since we primed the model with it
             val full = "डॉक्टर:$raw"
             Log.d(TAG, "Raw LLM response:\n$full")
-
             val map = FIELD_PATTERN.findAll(full).associate { m ->
                 m.groupValues[1] to cleanField(m.groupValues[1], m.groupValues[2])
             }
-
             Log.d(TAG, "Parsed: $map")
             return MedicalReport(
                 diagnosis  = map["डॉक्टर"]?.ifEmpty { DEFAULT_VALUE } ?: DEFAULT_VALUE,
                 medication = map["दवाई"]?.ifEmpty { DEFAULT_VALUE } ?: DEFAULT_VALUE,
-                dosage     = map["खुराक"]?.ifEmpty { DEFAULT_VALUE } ?: DEFAULT_VALUE,
                 otherTests = map["जांच"]?.ifEmpty { DEFAULT_VALUE } ?: DEFAULT_VALUE,
                 followUp   = map["फॉलोअप"]?.ifEmpty { DEFAULT_VALUE } ?: DEFAULT_VALUE
             )
@@ -99,16 +87,16 @@ Conversation: BP 160/100 है, सीने में हल्का दर�
 
         private fun cleanField(label: String, raw: String): String =
             raw.trim()
-                .removePrefix("$label:").trim()      // strip echoed label if model repeated it
-                .replace(Regex("\\*{1,2}([^*]+)\\*{1,2}"), "$1")  // bold/italic
-                .replace(Regex("#{1,6}\\s*"), "")                  // headers
-                .replace(Regex("(?m)^\\s*[-•–]\\s*"), "")          // bullet points
-                .replace(Regex("\\s{2,}"), " ")                    // extra whitespace
+                .removePrefix("$label:").trim()
+                .replace(Regex("\\*{1,2}([^*]+)\\*{1,2}"), "$1")
+                .replace(Regex("#{1,6}\\s*"), "")
+                .replace(Regex("(?m)^\\s*[-•–]\\s*"), "")
+                .replace(Regex("\\s{2,}"), " ")
                 .trim()
     }
 
     private var engine: Engine? = null
-    private val inferenceLock = Mutex()   // LiteRT-LM: only 1 conversation at a time
+    private val inferenceLock = Mutex()
 
     @Volatile
     var isModelLoaded = false
@@ -151,7 +139,6 @@ Conversation: BP 160/100 है, सीने में हल्का दर�
         onFieldDone: suspend (field: String, value: String) -> Unit = { _, _ -> }
     ): Result<MedicalReport> = withContext(Dispatchers.IO) {
         val eng = engine ?: return@withContext Result.failure(Exception("LLM model not loaded"))
-
         inferenceLock.withLock {
             try {
                 val (input, wasTruncated) = truncateInput(text)
@@ -164,7 +151,6 @@ Conversation: BP 160/100 है, सीने में हल्का दर�
                         samplerConfig = SAMPLER
                     )
                 )
-
                 val raw = try {
                     conv.sendMessage(extractionPrompt(input)).toString()
                 } finally {
@@ -172,13 +158,10 @@ Conversation: BP 160/100 है, सीने में हल्का दर�
                 }
 
                 val report = parseResponse(raw)
-
                 onFieldDone("diagnosis", report.diagnosis)
                 onFieldDone("medication", report.medication)
-                onFieldDone("dosage", report.dosage)
                 onFieldDone("tests", report.otherTests)
                 onFieldDone("followUp", report.followUp)
-
                 Result.success(report)
 
             } catch (e: kotlinx.coroutines.CancellationException) {
